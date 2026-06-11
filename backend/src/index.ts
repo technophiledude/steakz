@@ -1,0 +1,30 @@
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import { requestLogger }     from './middleware/logger.js';
+import authRoutes            from './routes/authRoutes.js';
+import adminRoutes           from './routes/adminRoutes.js';
+import operationalRoutes     from './routes/operationalRoutes.js';
+import managementRoutes      from './routes/managementRoutes.js';
+import seniorRoutes          from './routes/seniorRoutes.js';
+import { seedDatabase }      from './lib/seed.js';
+
+const app  = express();
+const port = process.env['PORT'] || 3001;
+
+app.use(cors({ origin: process.env['FRONTEND_URL'] ?? 'http://localhost:5173', credentials: true }));
+app.use(express.json());
+app.use(requestLogger);
+
+app.use('/api/auth',         authRoutes);
+app.use('/api/admin',        adminRoutes);
+app.use('/api/operational',  operationalRoutes);
+app.use('/api/management',   managementRoutes);
+app.use('/api/senior',       seniorRoutes);
+
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'Steakz MIS API' }));
+
+app.listen(port, async () => {
+  await seedDatabase();
+  console.log(`\n🥩  Steakz MIS Backend running on http://localhost:${port}`);
+});
